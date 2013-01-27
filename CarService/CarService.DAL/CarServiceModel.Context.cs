@@ -15,13 +15,17 @@ namespace CarService.DAL
     
     public partial class CarServiceEntities : DbContext
     {
-        public CarServiceEntities()
+        public CarServiceEntities(string connectionName, string schemaName)
             : base("name=CarServiceEntities")
         {
+			_schemaName = schemaName;
         }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+			Database.SetInitializer<CarServiceEntities>(new CreateDatabaseIfNotExists<CarServiceEntities>());
+			modelBuilder.Entity<CarServiceModel>().ToTable("CarServiceEntities", _schemaName);
+			base.OnModelCreating(modelBuilder);
             //throw new UnintentionalCodeFirstException();
         }
     
