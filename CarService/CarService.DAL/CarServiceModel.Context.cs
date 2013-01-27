@@ -23,13 +23,13 @@ namespace CarService.DAL
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-			Database.SetInitializer<CarServiceEntities>(new CreateDatabaseIfNotExists<CarServiceEntities>());
-			modelBuilder.Entity<Car>().ToTable("Cars");
-			modelBuilder.Entity<Employee>().ToTable("Employees");
-			modelBuilder.Entity<RepairCard>().ToTable("RepairCards");
-			modelBuilder.Entity<SparePart>().ToTable("SpareParts");
-			modelBuilder.Entity<UserProfile>().ToTable("UserProfile");
-			base.OnModelCreating(modelBuilder);
+			// Database.SetInitializer<CarServiceEntities>(new CreateDatabaseIfNotExists<CarServiceEntities>());
+			// modelBuilder.Entity<Car>().ToTable("Cars");
+			// modelBuilder.Entity<Employee>().ToTable("Employees");
+			// modelBuilder.Entity<RepairCard>().ToTable("RepairCards");
+			// modelBuilder.Entity<SparePart>().ToTable("SpareParts");
+			// modelBuilder.Entity<UserProfile>().ToTable("UserProfile");
+			// base.OnModelCreating(modelBuilder);
             //throw new UnintentionalCodeFirstException();
         }
     
