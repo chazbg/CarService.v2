@@ -16,20 +16,19 @@ namespace CarService.DAL
     public partial class CarServiceEntities : DbContext
     {
 		public string _schemaName = string.Empty;
-        public CarServiceEntities(string connectionName, string schemaName)
+        public CarServiceEntities()
             : base("name=CarServiceEntities")
         {
-			_schemaName = schemaName;
         }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 			Database.SetInitializer<CarServiceEntities>(new CreateDatabaseIfNotExists<CarServiceEntities>());
-			modelBuilder.Entity<Car>().ToTable("Cars", _schemaName);
-			modelBuilder.Entity<Employee>().ToTable("Employees", _schemaName);
-			modelBuilder.Entity<RepairCard>().ToTable("RepairCards", _schemaName);
-			modelBuilder.Entity<SparePart>().ToTable("SpareParts", _schemaName);
-			modelBuilder.Entity<UserProfile>().ToTable("UserProfile", _schemaName);
+			modelBuilder.Entity<Car>().ToTable("Cars");
+			modelBuilder.Entity<Employee>().ToTable("Employees");
+			modelBuilder.Entity<RepairCard>().ToTable("RepairCards");
+			modelBuilder.Entity<SparePart>().ToTable("SpareParts");
+			modelBuilder.Entity<UserProfile>().ToTable("UserProfile");
 			base.OnModelCreating(modelBuilder);
             //throw new UnintentionalCodeFirstException();
         }
