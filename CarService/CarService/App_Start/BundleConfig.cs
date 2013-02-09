@@ -33,6 +33,7 @@ namespace CarService
                         "~/Scripts/modernizr-*"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/Site.css"));
+            bundles.Add(new StyleBundle("~/Content/smoothAndSleek").Include("~/Content/smooth_and_sleek/style.css"));
 
             bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
                         "~/Content/themes/base/jquery.ui.core.css",

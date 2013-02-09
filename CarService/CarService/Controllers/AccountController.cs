@@ -36,9 +36,7 @@ namespace CarService.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginModel model, string returnUrl)
         {
-            CarServiceEntities db = new CarServiceEntities();
-            CarService.DAL.UserProfile user = new CarService.DAL.UserProfile();
-            user = db.UserProfiles.Where(u => u.UserName == model.UserName).First();
+            var user = UserDAL.GetUserByName(model.UserName);
 
             if (ModelState.IsValid && WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe) && user.Activated)
             {
@@ -88,37 +86,34 @@ namespace CarService.Controllers
             {
 
                 // Insert a new user into the database
-                using (CarServiceEntities db = new CarServiceEntities())
+                CarService.DAL.UserProfile user = UserDAL.GetUserByName(model.UserName);
+
+                // Attempt to register the user
+                try
                 {
-                    CarService.DAL.UserProfile user = db.UserProfiles.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
-
-                    // Attempt to register the user
-                    try
+                    if (null != user && false == user.Activated)
                     {
-                        if (null != user && false == user.Activated)
-                        {
-                            user.Activated = true;
-                            user.Email = model.Email;
-                            user.FirstName = model.FirstName;
-                            user.LastName = model.LastName;
-                            db.SaveChanges();
-                        }
-                        else
-                        {
-                            WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { FirstName = model.FirstName, LastName = model.LastName, Email = model.Email, Activated = true });
-
-                            if (!Roles.GetRolesForUser(model.UserName).Contains("User"))
-                            {
-                                Roles.AddUsersToRoles(new[] { model.UserName }, new[] { "User" });
-                            }
-
-                        }
-                        return RedirectToAction("Index", "Administrator/UserProfile");
+                        user.Activated = true;
+                        user.Email = model.Email;
+                        user.FirstName = model.FirstName;
+                        user.LastName = model.LastName;
+                        UserDAL.UpdateUser(user);
                     }
-                    catch (MembershipCreateUserException e)
+                    else
                     {
-                        ModelState.AddModelError("", ErrorCodeToString(e.StatusCode));
+                        WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { FirstName = model.FirstName, LastName = model.LastName, Email = model.Email, Activated = true });
+
+                        if (!Roles.GetRolesForUser(model.UserName).Contains("User"))
+                        {
+                            Roles.AddUsersToRoles(new[] { model.UserName }, new[] { "User" });
+                        }
+
                     }
+                    return RedirectToAction("Index", "Administrator/UserProfile");
+                }
+                catch (MembershipCreateUserException e)
+                {
+                    ModelState.AddModelError("", ErrorCodeToString(e.StatusCode));
                 }
             }
 
@@ -295,25 +290,22 @@ namespace CarService.Controllers
             if (ModelState.IsValid)
             {
                 // Insert a new user into the database
-                using (CarServiceEntities db = new CarServiceEntities())
+                var user = UserDAL.GetUserByName(model.UserName);
+
+                // Check if user already exists
+                if (user == null)
                 {
-                    CarService.DAL.UserProfile user = db.UserProfiles.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
-                    // Check if user already exists
-                    if (user == null)
-                    {
-                        // Insert name into the profile table
-                        db.UserProfiles.Add(new CarService.DAL.UserProfile { UserName = model.UserName, FirstName = model.FirstName, LastName = model.LastName, Email = model.Email, Activated = true });
-                        db.SaveChanges();
+                    // Insert name into the profile table
+                    UserDAL.AddUser(new CarService.DAL.UserProfile { UserName = model.UserName, FirstName = model.FirstName, LastName = model.LastName, Email = model.Email, Activated = true });
 
-                        OAuthWebSecurity.CreateOrUpdateAccount(provider, providerUserId, model.UserName);
-                        OAuthWebSecurity.Login(provider, providerUserId, createPersistentCookie: false);
+                    OAuthWebSecurity.CreateOrUpdateAccount(provider, providerUserId, model.UserName);
+                    OAuthWebSecurity.Login(provider, providerUserId, createPersistentCookie: false);
 
-                        return RedirectToLocal(returnUrl);
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("UserName", "User name already exists. Please enter a different user name.");
-                    }
+                    return RedirectToLocal(returnUrl);
+                }
+                else
+                {
+                    ModelState.AddModelError("UserName", "User name already exists. Please enter a different user name.");
                 }
             }
 

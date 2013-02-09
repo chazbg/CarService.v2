@@ -12,15 +12,13 @@ namespace CarService.Areas.Administrator.Controllers
 {
     public class SparePartController : AdminController
     {
-        private CarServiceEntities db = new CarServiceEntities();
 
         //
         // GET: /Administrator/SparePart/
 
         public ActionResult Index()
         {
-            var spareparts = db.SpareParts.Include(s => s.UserProfile);
-            return View(spareparts.ToList());
+            return View(SparePartDAL.SparePartsList());
         }
 
         //
@@ -28,7 +26,7 @@ namespace CarService.Areas.Administrator.Controllers
 
         public ActionResult Details(int id = 0)
         {
-            SparePart sparepart = db.SpareParts.Find(id);
+            SparePart sparepart = SparePartDAL.GetSparePartById(id);
             if (sparepart == null)
             {
                 return HttpNotFound();
@@ -54,8 +52,7 @@ namespace CarService.Areas.Administrator.Controllers
             {
                 sparepart.UserId = WebSecurity.CurrentUserId;
                 sparepart.Activated = true;
-                db.SpareParts.Add(sparepart);
-                db.SaveChanges();
+                SparePartDAL.AddSparePart(sparepart);
                 return RedirectToAction("Index");
             }
 
@@ -67,12 +64,11 @@ namespace CarService.Areas.Administrator.Controllers
 
         public ActionResult Edit(int id = 0)
         {
-            SparePart sparepart = db.SpareParts.Find(id);
-            if (sparepart == null)
+            SparePart sparepart = SparePartDAL.GetSparePartById(id);
+            if (sparepart == null || sparepart.Activated == false)
             {
                 return HttpNotFound();
             }
-            ViewBag.UserId = new SelectList(db.UserProfiles, "UserId", "UserName", sparepart.UserId);
             return View(sparepart);
         }
 
@@ -84,11 +80,9 @@ namespace CarService.Areas.Administrator.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(sparepart).State = EntityState.Modified;
-                db.SaveChanges();
+                SparePartDAL.UpdateSparePart(sparepart);
                 return RedirectToAction("Index");
             }
-            ViewBag.UserId = new SelectList(db.UserProfiles, "UserId", "UserName", sparepart.UserId);
             return View(sparepart);
         }
 
@@ -97,8 +91,8 @@ namespace CarService.Areas.Administrator.Controllers
 
         public ActionResult Delete(int id = 0)
         {
-            SparePart sparepart = db.SpareParts.Find(id);
-            if (sparepart == null)
+            SparePart sparepart = SparePartDAL.GetSparePartById(id);
+            if (sparepart == null || sparepart.Activated == false)
             {
                 return HttpNotFound();
             }
@@ -111,16 +105,14 @@ namespace CarService.Areas.Administrator.Controllers
         [HttpPost, ActionName("Delete")]
         public ActionResult DeleteConfirmed(int id)
         {
-            SparePart sparepart = db.SpareParts.Find(id);
-            sparepart.Activated = false;
-            db.SaveChanges();
+            SparePartDAL.DisableSparePart(id);
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            db.Dispose();
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    db.Dispose();
+        //    base.Dispose(disposing);
+        //}
     }
 }

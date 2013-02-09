@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<CarService.DAL.RepairCard>" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Content/smooth_and_sleek/Site.Master" Inherits="System.Web.Mvc.ViewPage<CarService.DAL.RepairCard>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Edit
@@ -46,7 +46,7 @@
         </div>
 
         <div class="editor-field">
-            <table>
+            <table class="sortable" id="pagedTable">
                 <tr>
                 <% {
                     int count = 0;
@@ -66,6 +66,7 @@
                 </tr>
              <% } %>
              </table>
+            <div id="pageNavPosition"></div>
         </div>
         <p>
             <input type="submit" value="Save" />
@@ -83,5 +84,11 @@
 </asp:Content>
 
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsSection" runat="server">
+    <script type="text/javascript"><!--
+    var pager = new Pager('pagedTable', 15);
+    pager.init();
+    pager.showPageNav('pager', 'pageNavPosition');
+    pager.showPage(1);
+    //--></script>
     <%: Scripts.Render("~/bundles/jqueryval") %>
 </asp:Content>

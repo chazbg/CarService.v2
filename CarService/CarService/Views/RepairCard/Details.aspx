@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<CarService.DAL.RepairCard>" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Content/smooth_and_sleek/Site.Master" Inherits="System.Web.Mvc.ViewPage<CarService.DAL.RepairCard>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Details
@@ -44,7 +44,7 @@
     </div>
  
 <h3>Parts used for the selected repair</h3> 
-<table> 
+<table class="sortable" id="pagedTable"> 
     <tr> 
         <th>Part No.</th> 
         <th>Part</th> 
@@ -66,6 +66,7 @@
     </tr> 
    <% } %>  
 </table> 
+<div id="pageNavPosition"></div>
 </fieldset>
 <p>
     <%: Html.ActionLink("Back to List", "Index") %>
@@ -77,4 +78,10 @@
 </asp:Content>
 
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsSection" runat="server">
+    <script type="text/javascript"><!--
+    var pager = new Pager('pagedTable', 15);
+    pager.init();
+    pager.showPageNav('pager', 'pageNavPosition');
+    pager.showPage(1);
+    //--></script>
 </asp:Content>

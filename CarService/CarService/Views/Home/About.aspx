@@ -1,38 +1,30 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Content/smooth_and_sleek/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 
 <asp:Content ID="aboutTitle" ContentPlaceHolderID="TitleContent" runat="server">
-    About - My ASP.NET MVC Application
+    About - FMI Autos
 </asp:Content>
 
 <asp:Content ID="aboutContent" ContentPlaceHolderID="MainContent" runat="server">
     <hgroup class="title">
-        <h1>About.</h1>
-        <h2><%: ViewBag.Message %></h2>
+        <h1>About FMI Autos</h1>
     </hgroup>
 
     <article>
         <p>
-            Use this area to provide additional information.
-        </p>
-
-        <p>
-            Use this area to provide additional information.
-        </p>
-
-        <p>
-            Use this area to provide additional information.
+            This is an ASP.NET Project for my course.
+            The site presents a car service which has users who can fill in the documentation about a car repair and add cars.
+            Administrators can also add new users, repair parts and service workers. 
         </p>
     </article>
 
     <aside>
-        <h3>Aside Title</h3>
+        <h3>Author</h3>
         <p>
-            Use this area to provide additional information.
+            Dian Nikolov /dian.nikolov91@gmail.com/
         </p>
         <ul>
             <li><%: Html.ActionLink("Home", "Index", "Home") %></li>
             <li><%: Html.ActionLink("About", "About", "Home") %></li>
-            <li><%: Html.ActionLink("Contact", "Contact", "Home") %></li>
         </ul>
     </aside>
 </asp:Content>

@@ -13,38 +13,21 @@ namespace CarService.Controllers
 {   [Authorize]
     public class RepairCardController : Controller
     {
-        private CarServiceEntities db = new CarServiceEntities();
-
         //
         // GET: /RepairCard/
 
         public ActionResult Index()
         {
             ViewBag.CurrentUserId = WebSecurity.CurrentUserId;
-            ViewBag.IsAdmin = db.UserProfiles.Where(u => u.UserName == "admin" || u.UserName == "Admin")
-                .Select(u => u.UserId)
-                .Single() == WebSecurity.CurrentUserId; 
+            ViewBag.IsAdmin = RepairCardDAL.AdminUserId() == WebSecurity.CurrentUserId; 
             
-            var repairCards = db.RepairCards
-                .Include(r => r.Car)
-                .Include(r => r.Employee)
-                .Include(r => r.UserProfile);
-
             PopulateEntryDatesList();
-            return View(repairCards.ToList());
+            return View(RepairCardDAL.RepairCardsList());
         }
 
         public void PopulateEntryDatesList()
         {
-            HashSet<string> entryDates = new HashSet<string>();
-            foreach (var repairCard in db.RepairCards)
-            {
-                if (!entryDates.Contains(repairCard.EntryDate.ToShortDateString()))
-                {
-                    entryDates.Add(repairCard.EntryDate.ToShortDateString());
-                }
-            }
-
+            HashSet<string> entryDates = RepairCardDAL.EntryDatesHashSet();
             ViewBag.EntryDates = entryDates.OrderBy(x => x); 
         }
 
@@ -54,14 +37,9 @@ namespace CarService.Controllers
         public ActionResult Index(FormCollection fc)
         {
             ViewBag.CurrentUserId = WebSecurity.CurrentUserId;
-            ViewBag.IsAdmin = db.UserProfiles.Where(u => u.UserName == "admin" || u.UserName == "Admin")
-                .Select(u => u.UserId)
-                .Single() == WebSecurity.CurrentUserId;
+            ViewBag.IsAdmin = RepairCardDAL.AdminUserId() == WebSecurity.CurrentUserId;
 
-            var repairCards = db.RepairCards
-                .Include(r => r.Car)
-                .Include(r => r.Employee)
-                .Include(r => r.UserProfile);
+            List<RepairCard> repairCards = RepairCardDAL.RepairCardsList();
 
             //Handle Search By Substring
             if (!String.IsNullOrEmpty(fc["searchString"]) && null != fc["entryDate"])
@@ -124,33 +102,14 @@ namespace CarService.Controllers
             }
 
             PopulateEntryDatesList();
-            return View(repairCards.ToList());
+            return View(repairCards);
         }
 
-        //public void QueryBySubstring(FormCollection fc)
-        //{
-        //    if (!String.IsNullOrEmpty(fc["searchString"]) && null != fc["entryDate"])
-        //    {
-        //        List<RepairCard> searchedRepairCards = new List<RepairCard>();
-
-        //        foreach (var repairCard in db.RepairCards)
-        //        {
-        //            if ((fc["entryDate"] == repairCard.EntryDate.ToString())
-        //                && (repairCard.Car.RegistryNumber.Contains(fc["searchString"]) || repairCard.Car.FrameNumber.ToString().Contains(fc["searchString"])))
-        //            {
-        //                searchedRepairCards.Add(repairCard);
-        //            }
-        //        }
-        //        PopulateEntryDatesList();
-        //        return View(searchedRepairCards);
-        //    }
-        //}
-        //
         // GET: /RepairCard/Details/5
 
         public ActionResult Details(int id = 0)
         {
-            RepairCard repaircard = db.RepairCards.Find(id);
+            RepairCard repaircard = RepairCardDAL.GetRepairCardById(id);
             if (repaircard == null)
             {
                 return HttpNotFound();
@@ -164,9 +123,9 @@ namespace CarService.Controllers
 
         public ActionResult Create()
         {
-            ViewBag.CarId = new SelectList(db.Cars, "Id", "RegistryNumber");
-            ViewBag.EmployeeId = new SelectList(db.Employees.Where(e => e.FirstName != "N/A"), "Id", "FirstName");
-            ViewBag.SpareParts = db.SpareParts.Where(p => p.Activated == true).ToList();
+            ViewBag.CarId = RepairCardDAL.CarIdList();
+            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(); 
+            ViewBag.SpareParts = RepairCardDAL.SparePartsList();
             return View();
         }
 
@@ -176,42 +135,42 @@ namespace CarService.Controllers
         [HttpPost]
         public ActionResult Create(RepairCard repairCard, string[] selectedParts)
         {
-                try
+            try
+            {
+                repairCard.PartsPrice = 0;
+
+                if (selectedParts == null)
                 {
-                    repairCard.PartsPrice = 0;
+                    repairCard.SpareParts = new List<SparePart>();
+                }
+                else
+                {
+                    var selectedPartsHS = new HashSet<string>(selectedParts);
 
-                    if (selectedParts == null)
+                    foreach (var sparePart in RepairCardDAL.ActivatedSpareCards())
                     {
-                        repairCard.SpareParts = new List<SparePart>();
-                    }
-                    else
-                    {
-                        var selectedPartsHS = new HashSet<string>(selectedParts);
-
-                        foreach (var sparePart in db.SpareParts.Where(p => p.Activated == true))
+                        if (selectedPartsHS.Contains(sparePart.Id.ToString()))
                         {
-                            if (selectedPartsHS.Contains(sparePart.Id.ToString()))
-                            {
-                                repairCard.SpareParts.Add(sparePart);
-                                repairCard.PartsPrice += sparePart.Price;
-                            }
+                            repairCard.SpareParts.Add(sparePart);
+                            repairCard.PartsPrice += sparePart.Price;
                         }
-
-                        repairCard.UserId = WebSecurity.CurrentUserId;
-                        repairCard.EntryDate = DateTime.Now;
-                        db.RepairCards.Add(repairCard);
-                        db.SaveChanges();
-                        return RedirectToAction("Index");
                     }
+
+                    repairCard.UserId = WebSecurity.CurrentUserId;
+                    repairCard.EntryDate = DateTime.Now;
+
+                    RepairCardDAL.AddRepairCard(repairCard);
+                    return RedirectToAction("Index");
                 }
-                catch (DataException)
-                {
-                    //Log the error (add a variable name after DataException)
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-                }
-            ViewBag.CarId = new SelectList(db.Cars, "Id", "RegistryNumber", repairCard.CarId);
-            ViewBag.EmployeeId = new SelectList(db.Employees.Where(e => e.FirstName != "N/A"), "Id", "FirstName", repairCard.EmployeeId);
-            ViewBag.SpareParts = db.SpareParts.Where(p => p.Activated == true).ToList();
+            }
+            catch (DataException)
+            {
+                //Log the error (add a variable name after DataException)
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
+            }
+            ViewBag.CarId = RepairCardDAL.CarIdList(repairCard);
+            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repairCard); 
+            ViewBag.SpareParts = RepairCardDAL.SparePartsList();
             return View(repairCard);
         }
 
@@ -220,23 +179,26 @@ namespace CarService.Controllers
 
         public ActionResult Edit(int id = 0)
         {
-            RepairCard repaircard = db.RepairCards.Find(id);
-            if (repaircard == null)
+            RepairCard repairCard = RepairCardDAL.GetRepairCardById(id);
+            if (repairCard == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.CarId = new SelectList(db.Cars, "Id", "RegistryNumber", repaircard.CarId);
-            ViewBag.EmployeeId = new SelectList(db.Employees.Where(e => e.FirstName != "N/A"), "Id", "FirstName", repaircard.EmployeeId);
+            else if (repairCard.UserId != WebSecurity.CurrentUserId && !User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Index","Error");
+            }
 
-            InitializeEditViewModel(repaircard);
-
-            return View(repaircard);
+            ViewBag.CarId = RepairCardDAL.CarIdList(repairCard);
+            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repairCard); 
+            InitializeEditViewModel(repairCard);
+            return View(repairCard);
         }
 
         public void InitializeEditViewModel(RepairCard repaircard)
         {
-            var allSpareParts = db.SpareParts.Where(p => p.Activated == true);
-            var repairCardParts = new HashSet<int>(repaircard.SpareParts.Select(c => c.Id));
+            var allSpareParts = RepairCardDAL.SparePartsList();
+            var repairCardParts = RepairCardDAL.SparePartsForCard(repaircard);
             var viewModel = new List<SelectedPartData>();
             foreach (var part in allSpareParts)
             {
@@ -257,10 +219,7 @@ namespace CarService.Controllers
         [HttpPost]
         public ActionResult Edit(int id, FormCollection formCollection, string[] selectedParts)
         {
-            var repairCardToUpdate = db.RepairCards
-                                       .Include(i => i.SpareParts)
-                                       .Where(i => i.Id == id)
-                                       .Single();
+            var repairCardToUpdate = RepairCardDAL.GetRepairCardById(id);
 
             if (TryUpdateModel(repairCardToUpdate, "", null, excludeProperties: new string[] { "SpareParts" }))
             {
@@ -274,9 +233,7 @@ namespace CarService.Controllers
                         repairCardToUpdate.PartsPrice += sparePart.Price;
                     }
 
-                    db.Entry(repairCardToUpdate).State = EntityState.Modified;
-                    db.SaveChanges();
-
+                    RepairCardDAL.UpdateRepairCard(repairCardToUpdate);
                     return RedirectToAction("Index");
                 }
                 catch (DataException)
@@ -285,8 +242,8 @@ namespace CarService.Controllers
                     ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
                 }
             }
-            ViewBag.CarId = new SelectList(db.Cars, "Id", "RegistryNumber", repairCardToUpdate.CarId);
-            ViewBag.EmployeeId = new SelectList(db.Employees, "Id", "FirstName", repairCardToUpdate.EmployeeId);
+            ViewBag.CarId = RepairCardDAL.CarIdList(repairCardToUpdate);
+            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repairCardToUpdate); 
             InitializeEditViewModel(repairCardToUpdate);
             return View(repairCardToUpdate);
         }
@@ -302,9 +259,9 @@ namespace CarService.Controllers
             }
 
             var selectedPartsHS = new HashSet<string>(selectedParts);
-            var repairCardSpareParts = new HashSet<int>
-                (repairCardToUpdate.SpareParts.Select(c => c.Id));
-            foreach (var sparePart in db.SpareParts.Where(p => p.Activated == true))
+            var repairCardSpareParts = RepairCardDAL.SparePartsForCard(repairCardToUpdate);
+
+            foreach (var sparePart in RepairCardDAL.SparePartsList())
             {
                 if (selectedPartsHS.Contains(sparePart.Id.ToString()))
                 {
@@ -327,13 +284,15 @@ namespace CarService.Controllers
 
         public ActionResult RepairFinish(int id = 0)
         {
-            RepairCard repaircard = db.RepairCards.Find(id);
-            if (repaircard == null)
+            RepairCard repaircard = RepairCardDAL.GetRepairCardById(id);
+            if (repaircard == null ||
+                (repaircard.UserId != WebSecurity.CurrentUserId && !User.IsInRole("Admin")) ||
+                null != repaircard.RepairFinishDate)
             {
                 return HttpNotFound();
             }
-            ViewBag.CarId = new SelectList(db.Cars, "Id", "RegistryNumber", repaircard.CarId);
-            ViewBag.EmployeeId = new SelectList(db.Employees.Where(e => e.FirstName != "N/A"), "Id", "FirstName", repaircard.EmployeeId);
+            ViewBag.CarId = RepairCardDAL.CarIdList(repaircard);
+            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repaircard); 
             return View(repaircard);
         }
 
@@ -348,8 +307,7 @@ namespace CarService.Controllers
                 if (repaircard.TotalPrice > repaircard.PartsPrice)
                 {
                     repaircard.RepairFinishDate = DateTime.Now;
-                    db.Entry(repaircard).State = EntityState.Modified;
-                    db.SaveChanges();
+                    RepairCardDAL.UpdateRepairCard(repaircard);
                     return RedirectToAction("Index");
                 }
                 else 
@@ -358,40 +316,10 @@ namespace CarService.Controllers
                 }
             }
 
-            ViewBag.CarId = new SelectList(db.Cars, "Id", "RegistryNumber", repaircard.CarId);
-            ViewBag.EmployeeId = new SelectList(db.Employees.Where(e => e.FirstName != "N/A"), "Id", "FirstName", repaircard.EmployeeId);
+            ViewBag.CarId = RepairCardDAL.CarIdList(repaircard);
+            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repaircard); 
             return View(repaircard);
         }
 
-        //
-        // GET: /RepairCard/Delete/5
-
-        public ActionResult Delete(int id = 0)
-        {
-            RepairCard repaircard = db.RepairCards.Find(id);
-            if (repaircard == null)
-            {
-                return HttpNotFound();
-            }
-            return View(repaircard);
-        }
-
-        //
-        // POST: /RepairCard/Delete/5
-
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            RepairCard repaircard = db.RepairCards.Find(id);
-            db.RepairCards.Remove(repaircard);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            db.Dispose();
-            base.Dispose(disposing);
-        }
     }
 }

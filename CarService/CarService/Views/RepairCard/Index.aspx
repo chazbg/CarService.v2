@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<CarService.DAL.RepairCard>>" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Content/smooth_and_sleek/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<CarService.DAL.RepairCard>>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Index
@@ -12,10 +12,9 @@
     <%: Html.ActionLink("Create New", "Create") %>
 </p>
 
- <table style="border:hidden">
-    <tr>
-        <td>
+
 <input type="button" onclick="toggleVisibility('queryBySubstring')" value="Search By Substring"/>
+<br />
 <%using (Html.BeginForm(null, null, FormMethod.Post, new { id = "queryBySubstring", style = "display:none" }))
   {  %>   
         <strong>Entry Date: </strong>
@@ -24,14 +23,10 @@
                      <option><%: date %></option>
                 <% } %>
         </select>
-<%: Html.TextBox("SearchString") %>  <input type="submit" value="Search" /> 
+        <strong>Reg. Number / Frame Number: </strong>
+        <%: Html.TextBox("SearchString", null, new {style = "font-size:14px" }) %>  <input type="submit" value="Search" /> 
 <%}%>
-        </td>
-   </tr>
-</table><br />
- <table style="border:hidden">
-    <tr>
-        <td>
+<br />
 <input type="button" onclick="toggleVisibility('queryByTimeInterval')" value="Search By Time Interval"/>
 <%using (Html.BeginForm(null, null, FormMethod.Post, new { id = "queryByTimeInterval", style = "display:none" }))
   {  %>   
@@ -49,9 +44,7 @@
         </select>
         <input type="submit" value="Search" /> 
 <%}%>
-    </td>
-   </tr>
-</table>
+
 <table class="sortable" id="pagedTable">
     <tr>
         <th>
@@ -121,12 +114,7 @@
     <%} %>
 </table>
 <div id="pageNavPosition"></div>
-<script type="text/javascript"><!--
-    var pager = new Pager('pagedTable', 15);
-    pager.init();
-    pager.showPageNav('pager', 'pageNavPosition');
-    pager.showPage(1);
-    //--></script>
+
 
 </asp:Content>
 
@@ -134,4 +122,10 @@
 </asp:Content>
 
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsSection" runat="server">
+    <script type="text/javascript"><!--
+    var pager = new Pager('pagedTable', 15);
+    pager.init();
+    pager.showPageNav('pager', 'pageNavPosition');
+    pager.showPage(1);
+    //--></script>
 </asp:Content>

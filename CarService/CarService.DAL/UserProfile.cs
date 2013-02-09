@@ -30,6 +30,8 @@ namespace CarService.DAL
         public int UserId { get; set; }
 
         [Required]
+        [RegularExpression("^[a-zA-Z]+[a-zA-Z0-9]*$", ErrorMessage = " The {0} must contain only latin characters and numbers, and must start with a character.")]
+        [StringLength(64, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength=3)]
         [Display(Name = "User")]
         public string UserName { get; set; }
 
@@ -42,6 +44,7 @@ namespace CarService.DAL
         public string LastName { get; set; }
 
         [Required]
+        [RegularExpression(@"^[a-z0-9_\.]+@[a-z0-9]+\.[a-z]+$",ErrorMessage="The {0} is not in the right format: \"example@example.example\" .")]
         [Display(Name = "E-Mail")]
         public string Email { get; set; }
         public bool Activated { get; set; }

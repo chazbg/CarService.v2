@@ -20,8 +20,7 @@ namespace CarService.Controllers
 
         public ActionResult Index()
         {
-            var cars = db.Cars.Include(c => c.UserProfile);
-            return View(cars.ToList());
+            return View(CarDAL.CarsList());
         }
 
         //
@@ -29,7 +28,7 @@ namespace CarService.Controllers
 
         public ActionResult Details(int id = 0)
         {
-            Car car = db.Cars.Find(id);
+            Car car = CarDAL.GetCarById(id);
             if (car == null)
             {
                 return HttpNotFound();
@@ -54,8 +53,7 @@ namespace CarService.Controllers
             if (ModelState.IsValid)
             {
                 car.UserId = WebSecurity.CurrentUserId;
-                db.Cars.Add(car);
-                db.SaveChanges();
+                CarDAL.AddCar(car);
                 return RedirectToAction("Index");
             }
             return View(car);
@@ -66,12 +64,11 @@ namespace CarService.Controllers
         
         public ActionResult Edit(int id = 0)
         {
-            Car car = db.Cars.Find(id);
+            Car car = CarDAL.GetCarById(id);
             if (car == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.UserId = new SelectList(db.UserProfiles, "UserId", "UserName", car.UserId);
             return View(car);
         }
 
@@ -85,8 +82,7 @@ namespace CarService.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    db.Entry(car).State = EntityState.Modified;
-                    db.SaveChanges();
+                    CarDAL.UpdateCar(car);
                     return RedirectToAction("Index");
                 }
             }

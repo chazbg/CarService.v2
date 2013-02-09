@@ -40,7 +40,7 @@ namespace CarService.Areas.Administrator.Controllers
         public ActionResult Edit(int id = 0)
         {
             UserProfile userprofile = db.UserProfiles.Find(id);
-            if (userprofile == null)
+            if (userprofile == null || userprofile.Activated == false)
             {
                 return HttpNotFound();
             }
@@ -69,7 +69,7 @@ namespace CarService.Areas.Administrator.Controllers
         public ActionResult Delete(int id = 0)
         {
             UserProfile userprofile = db.UserProfiles.Find(id);
-            if (userprofile == null)
+            if (userprofile == null || userprofile.Activated == false)
             {
                 return HttpNotFound();
             }

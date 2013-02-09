@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<CarService.Models.LocalPasswordModel>" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Content/smooth_and_sleek/Site.Master" Inherits="System.Web.Mvc.ViewPage<CarService.Models.LocalPasswordModel>" %>
 
 <asp:Content ID="manageTitle" ContentPlaceHolderID="TitleContent" runat="server">
     Manage Account

@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<CarService.DAL.UserProfile>>" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Content/smooth_and_sleek/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<CarService.DAL.UserProfile>>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Index
@@ -12,7 +12,7 @@
     <a href="../Account/Register">Create new</a>
 </p>
 
-<table>
+<table class="sortable" id="pagedTable">
     <tr>
         <th>
             Id 
@@ -56,13 +56,14 @@
             <%: Html.DisplayFor(modelItem => item.Activated) %>
         </td>
         <td>
-            <%: Html.ActionLink("Edit", "Edit", new { id=item.UserId }) %> |
-            <%: Html.ActionLink("Delete", "Delete", new { id=item.UserId }) %>
+            <%if (item.Activated) %><%: Html.ActionLink("Edit", "Edit", new { id=item.UserId }) %> 
+            | <%: Html.ActionLink("Delete", "Delete", new { id=item.UserId }) %>
         </td>
     </tr>
 <% } %>
 
 </table>
+<div id="pageNavPosition"></div>
 
 </asp:Content>
 
@@ -70,4 +71,10 @@
 </asp:Content>
 
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsSection" runat="server">
+    <script type="text/javascript">
+        var pager = new Pager('pagedTable', 15);
+        pager.init();
+        pager.showPageNav('pager', 'pageNavPosition');
+        pager.showPage(1);
+</script>
 </asp:Content>
