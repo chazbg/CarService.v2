@@ -156,6 +156,8 @@ namespace CarService.Controllers
                         }
                     }
 
+                    repairCard.RepairFinishDate = null;
+                    repairCard.TotalPrice = null;
                     repairCard.UserId = WebSecurity.CurrentUserId;
                     repairCard.EntryDate = DateTime.Now;
 
@@ -225,12 +227,22 @@ namespace CarService.Controllers
             {
                 try
                 {
-                    UpdateRepairCardSpareParts(selectedParts, repairCardToUpdate);
-
-                    repairCardToUpdate.PartsPrice = 0;
-                    foreach (var sparePart in repairCardToUpdate.SpareParts)
+                    if (formCollection["TotalPrice"] != null)
                     {
-                        repairCardToUpdate.PartsPrice += sparePart.Price;
+                        decimal totalPrice;
+                        decimal.TryParse(formCollection["TotalPrice"], out totalPrice);
+                        repairCardToUpdate.TotalPrice = totalPrice;
+                        repairCardToUpdate.RepairFinishDate = DateTime.Now;
+                    }
+                    else
+                    {
+                        UpdateRepairCardSpareParts(selectedParts, repairCardToUpdate);
+
+                        repairCardToUpdate.PartsPrice = 0;
+                        foreach (var sparePart in repairCardToUpdate.SpareParts)
+                        {
+                            repairCardToUpdate.PartsPrice += sparePart.Price;
+                        }
                     }
 
                     RepairCardDAL.UpdateRepairCard(repairCardToUpdate);
@@ -279,47 +291,5 @@ namespace CarService.Controllers
                 }
             }
         }
-        //
-        // GET: /RepairCard/RepairFinish/5
-
-        public ActionResult RepairFinish(int id = 0)
-        {
-            RepairCard repaircard = RepairCardDAL.GetRepairCardById(id);
-            if (repaircard == null ||
-                (repaircard.UserId != WebSecurity.CurrentUserId && !User.IsInRole("Admin")) ||
-                null != repaircard.RepairFinishDate)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.CarId = RepairCardDAL.CarIdList(repaircard);
-            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repaircard); 
-            return View(repaircard);
-        }
-
-        //
-        // POST: /RepairCard/RepairFinish/5
-
-        [HttpPost]
-        public ActionResult RepairFinish(RepairCard repaircard)
-        {
-            if (ModelState.IsValid)
-            {
-                if (repaircard.TotalPrice > repaircard.PartsPrice)
-                {
-                    repaircard.RepairFinishDate = DateTime.Now;
-                    RepairCardDAL.UpdateRepairCard(repaircard);
-                    return RedirectToAction("Index");
-                }
-                else 
-                {
-                    ModelState.AddModelError("", "Total Cost must be higher than the price of the parts.");
-                }
-            }
-
-            ViewBag.CarId = RepairCardDAL.CarIdList(repaircard);
-            ViewBag.EmployeeId = RepairCardDAL.EmployeeIdList(repaircard); 
-            return View(repaircard);
-        }
-
     }
 }

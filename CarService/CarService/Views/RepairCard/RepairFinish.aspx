@@ -8,7 +8,7 @@
 
 <h2>Finish Repair</h2>
 
-<% using (Html.BeginForm()) { %>
+<% using (Html.BeginForm("Edit", "RepairCard")) { %>
     <%: Html.ValidationSummary(true) %>
 
     <fieldset>

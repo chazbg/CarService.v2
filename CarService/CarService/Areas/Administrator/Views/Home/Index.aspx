@@ -38,7 +38,7 @@
         </li>
 
          <li>
-             <a href="../RepairCard">Manage cars</a>
+             <a href="../Car">Manage cars</a>
         </li>
          
     </ul>

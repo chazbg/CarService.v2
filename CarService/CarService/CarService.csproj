@@ -191,6 +191,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\RepairCardEditData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -200,7 +205,6 @@
     <Content Include="Areas\Administrator\Views\Employee\Edit.aspx" />
     <Content Include="Areas\Administrator\Views\Employee\Index.aspx" />
     <Content Include="Areas\Administrator\Views\Home\About.aspx" />
-    <Content Include="Areas\Administrator\Views\Home\Contact.aspx" />
     <Content Include="Areas\Administrator\Views\Home\Index.aspx" />
     <Content Include="Areas\Administrator\Views\Shared\Error.aspx" />
     <Content Include="Areas\Administrator\Views\Shared\_LoginPartial.aspx" />
@@ -212,9 +216,15 @@
     <Content Include="Areas\Administrator\Views\UserProfile\Edit.aspx" />
     <Content Include="Areas\Administrator\Views\UserProfile\Index.aspx" />
     <Content Include="Content\smooth_and_sleek\blue_gradient.css" />
-    <Content Include="Content\smooth_and_sleek\image\background_content.jpg" />
-    <Content Include="Content\smooth_and_sleek\image\background_footer.jpg" />
-    <Content Include="Content\smooth_and_sleek\image\background_header.jpg" />
+    <Content Include="Content\smooth_and_sleek\image\background_content.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\smooth_and_sleek\image\background_footer.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\smooth_and_sleek\image\background_header.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\smooth_and_sleek\red_and_black.css" />
     <Content Include="Content\smooth_and_sleek\style.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
@@ -303,7 +313,6 @@
     <Content Include="Views\Car\Index.aspx" />
     <Content Include="Views\Error\Index.aspx" />
     <Content Include="Views\Home\About.aspx" />
-    <Content Include="Views\Home\Contact.aspx" />
     <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\RepairCard\Create.aspx" />
     <Content Include="Views\RepairCard\Details.aspx" />
@@ -364,6 +373,12 @@
       <Name>CarService.DAL</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -380,7 +395,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerPort>39862</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:17198/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
